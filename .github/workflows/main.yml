@@ -1,0 +1,23 @@
+name: 'Test Runner'
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Branch
+        uses: actions/checkout@v3
+      - name: Create ENV
+        run: |
+          echo "${{ secrets.ENV_FILE }}" > .env
+      - name: Run Tests
+        run: |
+          npm test
+    
+    
+
+
