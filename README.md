@@ -1,5 +1,7 @@
 # HMS BACKEND EXPRESS
-This is the hms backend application implemented in javascript and typescript. It uses an already hosted online mongo database.
+![example workflow](https://github.com/Health-Record-Management/Backend/actions/workflows/main.yml/badge.svg)
+
+This is the backend for the health record management application. I has been implemented using Node.js and MongoDB.
 
 ## Environmental Variables
 Set the environmental variables in an .env file as follows:
