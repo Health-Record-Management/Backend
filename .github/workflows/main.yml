@@ -16,7 +16,7 @@ jobs:
           touch .env
           echo PORT=4000 >> .env
           echo MONGO_URI="${{ secrets.MONGO_URI }}" >> .env
-          echo MONGO_URI_TEST="${{ secrets.MONGO_URI }}" >> .env
+          echo MONGO_URI_TEST="${{ secrets.MONGO_URI_TEST }}" >> .env
           cat .env
       - name: Install
         run: |
