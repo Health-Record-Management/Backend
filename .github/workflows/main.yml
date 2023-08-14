@@ -1,0 +1,38 @@
+name: 'Test Runner'
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+
+    # Run on latest version of ubuntu
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checkout the branch
+      - name: Checkout Branch
+        uses: actions/checkout@v3
+      # Create .env from repository secrets
+      - name: Create ENV
+        run: |
+          touch .env
+          echo PORT=${{ secrets.PORT }} >> .env
+          echo MONGO_URI="${{ secrets.MONGO_URI }}" >> .env
+          echo MONGO_URI_TEST="${{ secrets.MONGO_URI_TEST }}" >> .env
+          cat .env
+      # Node install
+      - name: Install
+        run: |
+          npm ci
+      # Run tests
+      - name: Run Tests
+        run: |
+          npm run test
+    
+    
+
+
