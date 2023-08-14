@@ -15,6 +15,7 @@ jobs:
         run: |
           touch .env
           echo PORT=4000 >> .env
+          cat .env
       # - name: Install
       #  run: |
       #    npm ci
