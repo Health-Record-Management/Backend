@@ -5,11 +5,12 @@ import post_patientinfo from "../queries/patient/post_patientinfo";
 import update_patientinfo from "../queries/patient/update_patientInfo";
 import get_record from "../queries/patient/get_record";
 import { StatusCodes } from 'http-status-codes';
+const auth = require('../middleware/Auth/auth');
 
 const patientRouter = express.Router();
 
 // route to get patient information
-patientRouter.get("/patientinfo/", async(req, res) => {
+patientRouter.get("/patientinfo/", auth, async(req, res) => {
     const username = req.query.username as string;
 
     // code to check if username exist in database
@@ -24,7 +25,7 @@ patientRouter.get("/patientinfo/", async(req, res) => {
 });
 
 // route to regiseter patient
-patientRouter.post("/register/", async(req: Request, res: Response) => {
+patientRouter.post("/register/", auth, async(req: Request, res: Response) => {
     const body: {
         username: string;
         firstname: string;
@@ -48,7 +49,7 @@ patientRouter.post("/register/", async(req: Request, res: Response) => {
      }
 });
 
-patientRouter.get("/records/", async(req: Request, res: Response) => {
+patientRouter.get("/records/", auth, async(req: Request, res: Response) => {
     const username = req.query.username as string;
     const pageNumber = parseInt(req.query.page as string);
     const pageSize = 10
@@ -73,7 +74,7 @@ patientRouter.get("/records/", async(req: Request, res: Response) => {
     res.json(records)
 });
 
-patientRouter.get("/record/", async(req: Request, res: Response) => {
+patientRouter.get("/record/", auth, async(req: Request, res: Response) => {
     const recordid = req.query.recordid as string;
 
     // check pageNumber query parameter

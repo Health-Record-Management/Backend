@@ -5,6 +5,8 @@ import request from "supertest";
 import { app } from "../../app";
 import { StatusCodes } from "http-status-codes";
 
+const jwt = require("jsonwebtoken");
+
 const appRequest = request(app);
 describe("Doctor route ECE Test", () => {
     const Doctorinformation = {
@@ -21,6 +23,14 @@ describe("Doctor route ECE Test", () => {
         subject: "daily checkup",
         log: "Tract infection",
     };
+
+    const doctorToken = jwt.sign(
+        { username: Doctorinformation.username },
+        process.env.SECRET_KEY,
+        {
+            expiresIn: "2h",
+        }
+    );
 
     const patinetinformation = {
         username: "testpatinet",
@@ -46,7 +56,7 @@ describe("Doctor route ECE Test", () => {
             });
             const response = await appRequest.get(
                 "/doctor/" + "doctorinfo?username=" + Doctorinformation.username
-            );
+            ).set("x-access-token", doctorToken);
             expect(response.statusCode).toBeLessThan(300);
             expect(response.body).toHaveProperty(
                 "email",
@@ -101,7 +111,7 @@ describe("Doctor route ECE Test", () => {
                 "/patient/" +
                     "patientinfo?username=" +
                     patinetinformation.username
-            );
+            ).set("x-access-token", doctorToken);
             expect(response.status).toBeLessThan(300);
             expect(response.body).toHaveProperty(
                 "email",
@@ -148,6 +158,7 @@ describe("Doctor route ECE Test", () => {
         it("post record successfully", async () => {
             const response = await appRequest
                 .post("/doctor/" + "record-add")
+                .set("x-access-token", doctorToken)
                 .send({
                     doctorUsername: Doctorinformation.username,
                     patientUsername: patinetinformation.username,
@@ -196,6 +207,7 @@ describe("Doctor route ECE Test", () => {
         it("update doctor record successfully", async () => {
             const response = await appRequest
                 .post("/doctor/" + "doctorinfo")
+                .set("x-access-token", doctorToken)
                 .send({
                     username: Doctorinformation.username,
                     firstname: Doctorinformation.firstname,
@@ -214,6 +226,7 @@ describe("Doctor route ECE Test", () => {
         it("SHOULD create a new user if doctor does not exist", async () => {
             const response = await appRequest
                 .post("/doctor/" + "doctorinfo")
+                .set("x-access-token", doctorToken)
                 .send({
                     username: Doctorinformation.username + "invalid",
                     firstname: Doctorinformation.firstname,
@@ -249,6 +262,7 @@ describe("Doctor route ECE Test", () => {
         it("add patient successfully", async () => {
             const response = await appRequest
                 .post("/doctor/" + "patientlist")
+                .set("x-access-token", doctorToken)
                 .send({
                     patientUsername: patinetinformation.username,
                     doctorUsername: Doctorinformation.username,
@@ -260,6 +274,7 @@ describe("Doctor route ECE Test", () => {
         it("remove patient successfully", async () => {
             const response = await appRequest
                 .post("/doctor/" + "patientlist")
+                .set("x-access-token", doctorToken)
                 .send({
                     patientUsername: patinetinformation.username,
                     doctorUsername: Doctorinformation.username,
@@ -271,6 +286,7 @@ describe("Doctor route ECE Test", () => {
         it("unknown patient successfully", async () => {
             const response = await appRequest
                 .post("/doctor/" + "patientlist")
+                .set("x-access-token", doctorToken)
                 .send({
                     patientUsername: patinetinformation.username,
                     doctorUsername: Doctorinformation.username,
@@ -316,18 +332,23 @@ describe("Doctor route ECE Test", () => {
                 lastname: patinetinformation.lastname,
             });
 
-            await appRequest.post("/doctor/" + "patientlist").send({
-                patientUsername: patinetinformation.username,
-                doctorUsername: Doctorinformation.username,
-                action: "add",
-            });
+            await appRequest
+                .post("/doctor/" + "patientlist")
+                .set("x-access-token", doctorToken)
+                .send({
+                    patientUsername: patinetinformation.username,
+                    doctorUsername: Doctorinformation.username,
+                    action: "add",
+                });
         });
         it("check if doctor has patient", async () => {
-            const response = await appRequest.get(
-                "/doctor/" +
-                    "patientlist?username=" +
-                    Doctorinformation.username
-            );
+            const response = await appRequest
+                .get(
+                    "/doctor/" +
+                        "patientlist?username=" +
+                        Doctorinformation.username
+                )
+                .set("x-access-token", doctorToken);
             expect(response.body).toHaveProperty("patientList");
         });
 
@@ -338,7 +359,7 @@ describe("Doctor route ECE Test", () => {
                     "getpatients?username=" +
                     Doctorinformation.username +
                     "&page=1"
-            );
+            ).set("x-access-token", doctorToken);
             expect(response.body).toHaveProperty("patients");
             expect(response.body).toHaveProperty("pageCount");
             expect(response.body).toHaveProperty("pageNumber");
@@ -351,7 +372,7 @@ describe("Doctor route ECE Test", () => {
                     "getpatients?username=" +
                     Doctorinformation.username +
                     "&page=adfas"
-            );
+            ).set("x-access-token", doctorToken);
             expect(response.status).toBeGreaterThan(300);
         });
 
@@ -363,7 +384,7 @@ describe("Doctor route ECE Test", () => {
                     "&page=1" +
                     "&searchQuery=" +
                     patinetinformation.username
-            );
+            ).set("x-access-token", doctorToken);
             expect(response.statusCode).toBe(StatusCodes.OK);
             expect(response.body.patients).toHaveLength(1);
         });

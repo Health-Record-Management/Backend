@@ -23,6 +23,7 @@ jobs:
           echo PORT=${{ secrets.PORT }} >> .env
           echo MONGO_URI="${{ secrets.MONGO_URI }}" >> .env
           echo MONGO_URI_TEST="${{ secrets.MONGO_URI_TEST }}" >> .env
+          echo SECRET_KEY="${{ secrets.SECRET_KEY }}" >> .env
           cat .env
       # Node install
       - name: Install

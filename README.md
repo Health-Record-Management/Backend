@@ -9,6 +9,7 @@ Set the environmental variables in an .env file as follows:
 PORT={Choosen Port}
 MONGO_URI={URI from MongoDB}
 MONGO_URI_TEST={Test URI from MongoDB}
+SECRET_KEY={Secret Key for JWT}
 ```
 
 ## DEVELOPMENT

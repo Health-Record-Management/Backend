@@ -4,6 +4,9 @@ import { appRequest } from "../../test/e2e/serverSetup";
 import post_record from "../doctor/post_record";
 import get_record from './get_record';
 import mongoose from 'mongoose';
+
+const jwt = require("jsonwebtoken");
+
 describe("get_record UNIT TEST", () => {
     const patientPath = "/patient/";
     const searchQuery = "He";
@@ -44,7 +47,9 @@ describe("get_record UNIT TEST", () => {
         await setupRecords(doctor, patientPath, patient);
         const response = await appRequest.get(
             patientPath + "records?username=" + patient.username + "&page=1"
-        );
+        ).set("x-access-token", jwt.sign(
+            { username: patient.username }, process.env.SECRET_KEY, { expiresIn: "2h" }
+        ));
         records = response.body.records;
     });
 

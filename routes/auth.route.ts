@@ -7,6 +7,7 @@ import { loginPatient } from "../queries/auth/loginPatient";
 import { request } from "http";
 import { registerDoctor } from '../queries/auth/registerDoctor';
 import { loginDoctor } from '../queries/auth/loginDoctor';
+const jwt = require("jsonwebtoken");
 
 const authRouter = express.Router();
 
@@ -71,9 +72,16 @@ authRouter.post("/login-patient", async (req: Request, res: Response) => {
     });
 
     if (response.success) {
+        const token = jwt.sign(
+            { username: response.result?.username },
+            process.env.SECRET_KEY,
+            {
+                expiresIn: "2h",
+            }
+        );
         res.cookie("username", response.result?.username || "",{maxAge: 360000} );
         res.cookie("role", response.result?.role || "", {maxAge:3600000 });
-        res.status(response.statusCode);
+        res.status(response.statusCode).json(token);
         res.send()
     } else {
         res.status(response.statusCode).json({ error: response.message });
@@ -90,9 +98,16 @@ authRouter.post("/login-doctor", async (req: Request, res: Response) => {
     });
 
     if (response.success) {
+        const token = jwt.sign(
+            { username: response.result?.username },
+            process.env.SECRET_KEY,
+            {
+                expiresIn: "2h",
+            }
+        );
         res.cookie("username", response.result?.username || "",{maxAge: 360000} );
         res.cookie("role", response.result?.role || "", {maxAge:3600000 });
-        res.status(response.statusCode);
+        res.status(response.statusCode).json(token);
         res.send()
     } else {
         res.status(response.statusCode).json({ error: response.message });

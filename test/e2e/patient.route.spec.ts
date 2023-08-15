@@ -4,6 +4,9 @@ import { StatusCodes } from "http-status-codes";
 import { registerDoctor } from "../../queries/auth/registerDoctor";
 import post_record from "../../queries/doctor/post_record";
 import update_doctorinfo from "../../queries/doctor/update_doctorInfo";
+
+const jwt = require("jsonwebtoken");
+
 describe("PATIENT ROUTE E2E", () => {
     const patientPath = "/patient/";
     const searchQuery = "He";
@@ -30,6 +33,14 @@ describe("PATIENT ROUTE E2E", () => {
         healthCardNo: "123458901",
     };
 
+    const patientToken = jwt.sign(
+        { username: patient.username },
+        process.env.SECRET_KEY,
+        {
+            expiresIn: "2h",
+        }
+    );
+
     describe("GET patientinfo test", () => {
         const user = {
             email: "test@gmail.com",
@@ -51,7 +62,7 @@ describe("PATIENT ROUTE E2E", () => {
         it("SHOULD GET a Patient by valid username ", async () => {
             const response = await appRequest.get(
                 patientPath + "patientinfo?username=" + user.username
-            );
+            ).set("x-access-token", patientToken);
             expect(response.status).toBeLessThan(300);
             expect(response.body).toHaveProperty("phoneNumber");
             expect(response.body).toHaveProperty("dateOfBirth");
@@ -77,7 +88,7 @@ describe("PATIENT ROUTE E2E", () => {
         it("SHOULD get an error message if Patient username is invalid", async () => {
             const response = await appRequest.get(
                 patientPath + "patientinfo?username=" + "Invalid"
-            );
+            ).set("x-access-token", patientToken);
 
             expect(response.statusCode).toBe(StatusCodes.NOT_FOUND);
             expect(response.body).toHaveProperty("message");
@@ -100,6 +111,7 @@ describe("PATIENT ROUTE E2E", () => {
         it("SHOULD register patient that is not in the database", async () => {
             const response = await appRequest
                 .post(patientPath + "register")
+                .set("x-access-token", patientToken)
                 .send({
                     ...user,
                 });
@@ -109,13 +121,16 @@ describe("PATIENT ROUTE E2E", () => {
         });
 
         it("SHOULD update patient if patient already exists", async () => {
-            await appRequest.post(patientPath + "register").send({
-                ...user,
-            });
+            await appRequest.post(patientPath + "register")
+                .set("x-access-token", patientToken)
+                .send({
+                    ...user,
+                });
             user.postalCode = "3H23J0";
             user.healthCardNo = "0987654321";
             const response = await appRequest
                 .post(patientPath + "register")
+                .set("x-access-token", patientToken)
                 .send({
                     ...user,
                 });
@@ -134,7 +149,7 @@ describe("PATIENT ROUTE E2E", () => {
             // get all patient records
             const response = await appRequest.get(
                 patientPath + "records?username=" + patient.username + "&page=1"
-            );
+            ).set("x-access-token", patientToken);
 
             // checks
             expect(response.statusCode).toBe(StatusCodes.OK);
@@ -150,7 +165,7 @@ describe("PATIENT ROUTE E2E", () => {
                     "records?username=" +
                     patient.username +
                     "&page=adfas"
-            );
+            ).set("x-access-token", patientToken);
 
             // checks
             expect(response.statusCode).toBe(StatusCodes.BAD_REQUEST);
@@ -167,7 +182,7 @@ describe("PATIENT ROUTE E2E", () => {
                     "&page=1" +
                     "&searchQuery=" +
                     searchQuery
-            );
+            ).set("x-access-token", patientToken);
 
             // checks
             expect(response.statusCode).toBe(StatusCodes.OK);
@@ -180,7 +195,7 @@ describe("PATIENT ROUTE E2E", () => {
         it("SHOULD get an empty list of if a user that has no record is passed", async () => {
             const response = await appRequest.get(
                 patientPath + "records?username=" + "newUser" + "&page=1"
-            );
+            ).set("x-access-token", patientToken);
 
             // checks
             expect(response.statusCode).toBe(StatusCodes.OK);
@@ -207,7 +222,7 @@ describe("PATIENT ROUTE E2E", () => {
             await setupRecords(doctor, patientPath, patient);
             const response = await appRequest.get(
                 patientPath + "records?username=" + patient.username + "&page=1"
-            );
+            ).set("x-access-token", patientToken);
             records = response.body.records;
         });
 
@@ -217,7 +232,7 @@ describe("PATIENT ROUTE E2E", () => {
             for (const record of records) {
                 const response = await appRequest.get(
                     patientPath + "record?recordid=" + record._id
-                );
+                ).set("x-access-token", patientToken);
                 expect(response.statusCode).toBe(StatusCodes.OK);
                 expect(response.body).toHaveProperty("date");
                 expect(response.body).toHaveProperty("doctorUsername");
@@ -242,7 +257,8 @@ describe("PATIENT ROUTE E2E", () => {
         });
 
         it("SHOULD send an error if recordid isn't passed to the request", async () => {
-            const response = await appRequest.get(patientPath + "record");
+            const response = await appRequest.get(patientPath + "record")
+                .set("x-access-token", patientToken);
             expect(response.statusCode).toBe(StatusCodes.BAD_REQUEST);
             expect(response.body).toHaveProperty("message");
             expect(response.body.message).toBeTruthy();
@@ -251,7 +267,7 @@ describe("PATIENT ROUTE E2E", () => {
         it("SHOULD send an error if recordid does not exist", async () => {
             const response = await appRequest.get(
                 patientPath + "record?recordid=" + "invalid"
-            );
+            ).set("x-access-token", patientToken);
             expect(response.statusCode).toBe(StatusCodes.NOT_FOUND);
             expect(response.body).toHaveProperty("message");
             expect(response.body.message).toBeTruthy();

@@ -1,5 +1,4 @@
 import express, { Request, Response } from "express";
-
 import get_doctorinfo from '../queries/doctor/get_doctorinfo'
 import post_doctorinfo from '../queries/doctor/post_doctorinfo'
 import get_patientlist from '../queries/doctor/get_patientlist'
@@ -8,11 +7,12 @@ import remove_patient from '../queries/doctor/remove_patient'
 import post_record from '../queries/doctor/post_record'
 import update_doctorinfo from "../queries/doctor/update_doctorInfo";
 import get_patients from "../queries/doctor/get_patients";
+const auth = require('../middleware/Auth/auth');
 
 const doctorRouter = express.Router();
 
 // route to get doctor information
-doctorRouter.get("/doctorinfo/", async(req: Request, res: Response) => {
+doctorRouter.get("/doctorinfo/", auth, async(req: Request, res: Response) => {
     let doctorUsername = req.query.username as string;
     // code to get doctor information using doctor username
     const doctorInfo = await get_doctorinfo(doctorUsername)
@@ -26,7 +26,7 @@ doctorRouter.get("/doctorinfo/", async(req: Request, res: Response) => {
 });
 
 // route to post doctor information
-doctorRouter.post("/doctorinfo/", async(req: Request, res: Response) => {
+doctorRouter.post("/doctorinfo/", auth, async(req: Request, res: Response) => {
     let requestInfo = req.body
     // Check if doctor already exists
     const existingDoctor = await get_doctorinfo(requestInfo.username)
@@ -44,7 +44,7 @@ doctorRouter.post("/doctorinfo/", async(req: Request, res: Response) => {
 });
 
 // route to get a doctors patientList
-doctorRouter.get("/patientlist/", async(req: Request, res: Response) => {
+doctorRouter.get("/patientlist/", auth, async(req: Request, res: Response) => {
     let doctorUsername = req.query.username as string;
     // code to get patient list of a doctor from the database
     const patientlist = await get_patientlist(doctorUsername)
@@ -58,7 +58,7 @@ doctorRouter.get("/patientlist/", async(req: Request, res: Response) => {
 });
 
 // route to add a patient to a doctors list
-doctorRouter.post("/patientlist/", async(req: Request, res: Response) => {
+doctorRouter.post("/patientlist/", auth, async(req: Request, res: Response) => {
     const body: {
         patientUsername: string;
         doctorUsername: string;
@@ -77,7 +77,7 @@ doctorRouter.post("/patientlist/", async(req: Request, res: Response) => {
 });
 
 // route for a doctor to create a health record for a patient
-doctorRouter.post("/record-add/", async(req: Request, res: Response) => {
+doctorRouter.post("/record-add/", auth, async(req: Request, res: Response) => {
     const body: {
         patientUsername: string;
         doctorUsername: string;
@@ -111,7 +111,7 @@ doctorRouter.post("/record-add/", async(req: Request, res: Response) => {
     }
 });
 
-doctorRouter.get("/getpatients/", async(req: Request, res: Response) => {
+doctorRouter.get("/getpatients/", auth, async(req: Request, res: Response) => {
     const pageNumber = parseInt(req.query.page as string);
     const pageSize = 10
     const searchQuery = req.query.searchQuery as string
